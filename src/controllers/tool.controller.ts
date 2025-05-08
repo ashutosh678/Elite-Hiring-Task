@@ -5,9 +5,10 @@ import User from "../models/User.model";
 import UsageLog from "../models/UsageLog.model";
 import { Plan } from "../enum/Plan.enum";
 import { AuthenticatedRequest } from "../middleware/auth.middleware";
+import { HuggingFaceSummarizerService } from "../services/huggingFaceSummarizer.service";
 
 const googleGeminiService = new GoogleGeminiService();
-
+const huggingFaceSummarizerService = new HuggingFaceSummarizerService();
 export const useTool = async (
 	req: AuthenticatedRequest,
 	res: Response
@@ -44,7 +45,8 @@ export const useTool = async (
 
 		let aiResponse;
 		if (toolName === "summarizer") {
-			aiResponse = await googleGeminiService.generateText(prompt);
+			// aiResponse = await googleGeminiService.generateText(prompt);
+			aiResponse = await huggingFaceSummarizerService.summarizeText(prompt);
 		} else {
 			aiResponse = "AI response simulation for " + toolName;
 		}
