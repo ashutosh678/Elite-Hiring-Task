@@ -15,6 +15,10 @@ app.use(express.json());
 // Connect to MongoDB
 connectToDatabase();
 
+app.get("/", (req, res) => {
+	res.send("Hello World");
+});
+
 // Use auth routes
 app.use("/auth", authRoutes);
 
