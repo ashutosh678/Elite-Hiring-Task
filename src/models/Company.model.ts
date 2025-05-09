@@ -1,16 +1,18 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { Plan } from "../enum/Plan.enum";
 
-interface ICompany extends Document {
+export interface ICompany extends Document {
 	name: string;
-	plan: Plan;
-	usageLimit: number;
+	plan: string;
+	usageCount: number;
+	users: mongoose.Types.ObjectId[];
 }
 
 const CompanySchema: Schema = new Schema({
 	name: { type: String, required: true },
-	plan: { type: String, enum: Object.values(Plan), required: true },
-	usageLimit: { type: Number, required: true },
+	plan: { type: String, required: true },
+	usageCount: { type: Number, default: 0 },
+	users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
 
 export default mongoose.model<ICompany>("Company", CompanySchema);

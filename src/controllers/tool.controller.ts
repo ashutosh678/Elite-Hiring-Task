@@ -2,13 +2,15 @@ import { Request, Response } from "express";
 import { logger } from "../utils/logger";
 import { GoogleGeminiService } from "../services/googleGemini.service";
 import User from "../models/User.model";
+import Company from "../models/Company.model";
 import UsageLog from "../models/UsageLog.model";
-import { Plan } from "../enum/Plan.enum";
 import { AuthenticatedRequest } from "../middleware/auth.middleware";
 import { HuggingFaceSummarizerService } from "../services/huggingFaceSummarizer.service";
+import type { ICompany } from "../models/Company.model";
 
 const googleGeminiService = new GoogleGeminiService();
 const huggingFaceSummarizerService = new HuggingFaceSummarizerService();
+
 export const useTool = async (
 	req: AuthenticatedRequest,
 	res: Response
@@ -23,30 +25,32 @@ export const useTool = async (
 			return;
 		}
 
-		const user = await User.findById(req.user._id);
-		if (!user) {
-			res.status(404).json({ message: "User not found" });
+		const user = await User.findById(req.user._id).populate<{
+			companyId: ICompany;
+		}>("companyId");
+		if (!user || !user.companyId) {
+			res.status(404).json({ message: "User or company not found" });
 			return;
 		}
 
+		const company = user.companyId as ICompany;
 		const usageLimits = {
-			[Plan.Free]: 100,
-			[Plan.Pro]: 500,
-			[Plan.Enterprise]: Infinity,
+			Free: 100,
+			Pro: 500,
+			Enterprise: Infinity,
 		};
 
-		const currentUsage = await UsageLog.countDocuments({
-			userId: req.user._id,
-		});
-		if (currentUsage >= usageLimits[user.plan]) {
+		if (
+			company.usageCount >=
+			usageLimits[company.plan as keyof typeof usageLimits]
+		) {
 			res.status(403).json({ message: "Usage limit exceeded" });
 			return;
 		}
 
 		let aiResponse;
 		if (toolName === "summarizer") {
-			// aiResponse = await googleGeminiService.generateText(prompt);
-			aiResponse = await huggingFaceSummarizerService.summarizeText(prompt);
+			aiResponse = await googleGeminiService.generateText(prompt);
 		} else {
 			aiResponse = "AI response simulation for " + toolName;
 		}
@@ -58,6 +62,9 @@ export const useTool = async (
 			aiResponse,
 		});
 		await usageLog.save();
+
+		company.usageCount += 1;
+		await company.save();
 
 		logger.info("Tool used successfully:", toolName);
 

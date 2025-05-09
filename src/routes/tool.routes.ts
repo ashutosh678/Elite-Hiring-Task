@@ -1,7 +1,7 @@
 import express from "express";
 import { authenticateJWT } from "../middleware/auth.middleware";
 import { useTool } from "../controllers/tool.controller";
-import { checkUsageLimit } from "../middleware/usageLimit.middleware";
+import { usageLimitMiddleware } from "../middleware/usageLimit.middleware";
 import { apiLimiter, abuseDetection } from "../middleware/rateLimit.middleware";
 
 const router = express.Router();
@@ -9,7 +9,7 @@ const router = express.Router();
 router.post(
 	"/use-tool",
 	authenticateJWT,
-	checkUsageLimit,
+	usageLimitMiddleware,
 	apiLimiter,
 	abuseDetection,
 	useTool
