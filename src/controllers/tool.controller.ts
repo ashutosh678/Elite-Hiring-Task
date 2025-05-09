@@ -52,7 +52,7 @@ export const useTool = async (
 		if (toolName === "summarizer") {
 			aiResponse = await googleGeminiService.generateText(prompt);
 		} else {
-			aiResponse = "AI response simulation for " + toolName;
+			aiResponse = await huggingFaceSummarizerService.summarizeText(prompt);
 		}
 
 		const usageLog = new UsageLog({
