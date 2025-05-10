@@ -14,8 +14,6 @@ const secretKey = process.env.JWT_SECRET_KEY || "your_jwt_secret_key";
 export const signup = async (req: Request, res: Response): Promise<void> => {
 	const { name, email, password, role, companyId } = req.body;
 
-	console.log(req.body);
-
 	try {
 		const hashedPassword = await bcrypt.hash(password, 10);
 		const user = new User({
