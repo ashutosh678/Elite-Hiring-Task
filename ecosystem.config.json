@@ -12,11 +12,13 @@
 			"time": true,
 			"env": {
 				"NODE_ENV": "development",
-				"PORT": 4000
+				"PORT": 4000,
+				"HOST": "0.0.0.0"
 			},
 			"env_production": {
 				"NODE_ENV": "production",
-				"PORT": 80
+				"PORT": 4000,
+				"HOST": "0.0.0.0"
 			},
 			"exp_backoff_restart_delay": 100,
 			"max_restarts": 10,

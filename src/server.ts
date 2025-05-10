@@ -9,19 +9,26 @@ import cors from "cors";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = Number(process.env.PORT) || 4000;
+const HOST = process.env.HOST || "0.0.0.0";
 
 // CORS Configuration
-const corsOptions = {
-	origin: "*", // In production, replace with your actual frontend domain
-	methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-	allowedHeaders: ["Content-Type", "Authorization"],
-	credentials: true,
-	maxAge: 86400, // 24 hours
-};
+app.use(
+	cors({
+		origin: "*",
+		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+		allowedHeaders: ["Content-Type", "Authorization"],
+		credentials: true,
+	})
+);
+
+// Add request logging
+app.use((req, res, next) => {
+	console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+	next();
+});
 
 // Middleware
-app.use(cors(corsOptions));
 app.use(express.json());
 
 // Connect to MongoDB
@@ -41,6 +48,7 @@ app.use("/company", companyRoutes);
 app.use("/tool", toolRoutes);
 
 // Start server
-app.listen(PORT, () => {
-	console.log(`Server is running on port ${PORT}`);
+app.listen(PORT, HOST, () => {
+	console.log(`Server is running on http://${HOST}:${PORT}`);
+	console.log("CORS is enabled for all origins");
 });
